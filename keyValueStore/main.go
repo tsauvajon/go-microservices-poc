@@ -21,7 +21,7 @@ func main() {
 	http.HandleFunc("/remove", remove)
 	http.HandleFunc("/list", list)
 
-	http.ListenAndServe(":3333", nil)
+	http.ListenAndServe(":3330", nil)
 }
 
 func get(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +47,7 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 	// Mutex lock
 	keyValueStoreMutex.RLock()
-	value := keyValueStore[string(values.Get("key"))]
+	value := keyValueStore[values.Get("key")]
 	keyValueStoreMutex.RUnlock()
 
 	fmt.Fprint(w, value)
@@ -84,7 +84,7 @@ func set(w http.ResponseWriter, r *http.Request) {
 	}
 
 	keyValueStoreMutex.Lock()
-	keyValueStore[string(key)] = string(value)
+	keyValueStore[key] = value
 	keyValueStoreMutex.Unlock()
 
 	fmt.Fprint(w, "Success")
