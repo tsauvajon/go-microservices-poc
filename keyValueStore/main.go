@@ -74,7 +74,7 @@ func set(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(value) == 0 {
-		errorHandling.RespondWithError(w "Wrong input value")
+		errorHandling.RespondWithError(w, "Wrong input value")
 		return
 	}
 

@@ -53,6 +53,7 @@ func receiveImage(w http.ResponseWriter, r *http.Request) {
 
 	if state != StateWorking && state != StateFinished {
 		errorHandling.RespondWithError(w, "invalid state")
+		return
 	}
 
 	_, err = strconv.Atoi(id)
