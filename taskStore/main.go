@@ -6,11 +6,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/tsauvajon/go-microservices-poc/registering"
 	"github.com/tsauvajon/go-microservices-poc/task"
 )
 
@@ -22,6 +22,9 @@ var (
 )
 
 func main() {
+	if !registering.RegisterInKeyValueStore("keyValueStoreAddress") {
+		return
+	}
 
 	datastore = make(map[int]task.Task)
 	datastoreMutex = sync.RWMutex{}
@@ -37,39 +40,6 @@ func main() {
 	http.HandleFunc("/list", list)
 
 	http.ListenAndServe(":3331", nil)
-}
-
-func registerInKeyValueStore() bool {
-	if len(os.Args) < 3 {
-		fmt.Println("Too few arguments")
-		return false
-	}
-
-	// itself
-	databaseAddress := os.Args[1]
-	keyValueStoreAddress := os.Args[2]
-
-	// Todo : use body instead ...
-	response, err := http.Post("http://"+keyValueStoreAddress+"/set?key=databaseAddress&value="+databaseAddress, "", nil)
-
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-
-	data, err := ioutil.ReadAll(response.Body)
-
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-
-	if response.StatusCode != http.StatusOK {
-		fmt.Println("Error: ", "failure contacting the key-value store", string(data))
-		return false
-	}
-
-	return true
 }
 
 func getByID(w http.ResponseWriter, r *http.Request) {
@@ -272,7 +242,7 @@ func setByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	taskToSet := Task{}
+	taskToSet := task.Task{}
 
 	err = json.Unmarshal([]byte(data), &taskToSet)
 
