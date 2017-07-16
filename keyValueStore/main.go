@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/url"
 	"sync"
+
+	"github.com/tsauvajon/go-microservices-poc/errorHandling"
 )
 
 var (
@@ -26,22 +28,19 @@ func main() {
 
 func get(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Error:", "Only GET accepted")
+		errorHandling.RespondOnlyXAccepted(w, "GET")
 		return
 	}
 
 	values, err := url.ParseQuery(r.URL.RawQuery)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Error:", err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
 	if len(values.Get("key")) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Error:", "Wrong input key")
+		errorHandling.RespondWithError(w, "Wrong input key")
 		return
 	}
 
@@ -55,16 +54,14 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 func set(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Error: Only POST accepted")
+		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
 	}
 
 	values, err := url.ParseQuery(r.URL.RawQuery)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Error:", err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
@@ -72,14 +69,12 @@ func set(w http.ResponseWriter, r *http.Request) {
 	value := values.Get("value")
 
 	if len(key) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Error:", "Wrong input key")
+		errorHandling.RespondWithError(w, "Wrong input key")
 		return
 	}
 
 	if len(value) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Error:", "Wrong input value")
+		errorHandling.RespondWithError(w "Wrong input value")
 		return
 	}
 
@@ -92,24 +87,21 @@ func set(w http.ResponseWriter, r *http.Request) {
 
 func remove(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Error:", "Only DELETE accepted")
+		errorHandling.RespondOnlyXAccepted(w, "DELETE")
 		return
 	}
 
 	values, err := url.ParseQuery(r.URL.RawQuery)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Error:", err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
 	key := values.Get("key")
 
 	if len(key) == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Error:", "Wrong input key")
+		errorHandling.RespondWithError(w, "Wrong input key")
 		return
 	}
 
@@ -122,8 +114,7 @@ func remove(w http.ResponseWriter, r *http.Request) {
 
 func list(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Error:", "Only GET accepted")
+		errorHandling.RespondOnlyXAccepted(w, "GET")
 		return
 	}
 

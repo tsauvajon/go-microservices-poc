@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/tsauvajon/go-microservices-poc/errorHandling"
 	"github.com/tsauvajon/go-microservices-poc/registering"
 	"github.com/tsauvajon/go-microservices-poc/task"
 )
@@ -44,28 +45,28 @@ func main() {
 
 func getByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		respondOnlyXAccepted(w, "GET")
+		errorHandling.RespondOnlyXAccepted(w, "GET")
 		return
 	}
 
 	values, err := url.ParseQuery(r.URL.RawQuery)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
 	strid := values.Get("id")
 
 	if len(strid) == 0 {
-		respondWithError(w, "Invalid ID")
+		errorHandling.RespondWithError(w, "Invalid ID")
 		return
 	}
 
 	id, err := strconv.Atoi(strid)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
@@ -74,7 +75,7 @@ func getByID(w http.ResponseWriter, r *http.Request) {
 	datastoreMutex.RUnlock()
 
 	if isInError {
-		respondWithError(w, "This ID does not exist")
+		errorHandling.RespondWithError(w, "This ID does not exist")
 		return
 	}
 
@@ -85,7 +86,7 @@ func getByID(w http.ResponseWriter, r *http.Request) {
 	response, err := json.Marshal(value)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
@@ -94,7 +95,7 @@ func getByID(w http.ResponseWriter, r *http.Request) {
 
 func newTask(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		respondOnlyXAccepted(w, "POST")
+		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
 	}
 
@@ -111,7 +112,7 @@ func newTask(w http.ResponseWriter, r *http.Request) {
 
 func getNewTask(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		respondOnlyXAccepted(w, "GET")
+		errorHandling.RespondOnlyXAccepted(w, "GET")
 		return
 	}
 
@@ -124,7 +125,7 @@ func getNewTask(w http.ResponseWriter, r *http.Request) {
 	datastoreMutex.RUnlock()
 
 	if isInError {
-		respondWithError(w, "no available task")
+		errorHandling.RespondWithError(w, "no available task")
 		return
 	}
 
@@ -152,7 +153,7 @@ func getNewTask(w http.ResponseWriter, r *http.Request) {
 	datastoreMutex.Unlock()
 
 	if taskToSend.ID == -1 {
-		respondWithError(w, "no available task")
+		errorHandling.RespondWithError(w, "no available task")
 		return
 	}
 
@@ -172,7 +173,7 @@ func getNewTask(w http.ResponseWriter, r *http.Request) {
 	response, err := json.Marshal(taskToSend)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
@@ -181,28 +182,28 @@ func getNewTask(w http.ResponseWriter, r *http.Request) {
 
 func finishTask(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		respondOnlyXAccepted(w, "POST")
+		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
 	}
 
 	values, err := url.ParseQuery(r.URL.RawQuery)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
 	strid := values.Get("id")
 
 	if len(strid) == 0 {
-		respondWithError(w, "Invalid ID")
+		errorHandling.RespondWithError(w, "Invalid ID")
 		return
 	}
 
 	id, err := strconv.Atoi(strid)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
@@ -223,7 +224,7 @@ func finishTask(w http.ResponseWriter, r *http.Request) {
 	datastoreMutex.RUnlock()
 
 	if isInError {
-		respondWithError(w, "wrong input")
+		errorHandling.RespondWithError(w, "wrong input")
 	}
 
 	fmt.Fprint(w, "Success")
@@ -231,14 +232,14 @@ func finishTask(w http.ResponseWriter, r *http.Request) {
 
 func setByID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		respondOnlyXAccepted(w, "POST")
+		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
 	}
 
 	data, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
@@ -247,7 +248,7 @@ func setByID(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal([]byte(data), &taskToSet)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
@@ -262,7 +263,7 @@ func setByID(w http.ResponseWriter, r *http.Request) {
 	datastoreMutex.RUnlock()
 
 	if isInError {
-		respondWithError(w, "wrong input")
+		errorHandling.RespondWithError(w, "wrong input")
 	}
 
 	fmt.Fprint(w, "Success")
@@ -270,7 +271,7 @@ func setByID(w http.ResponseWriter, r *http.Request) {
 
 func list(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		respondOnlyXAccepted(w, "GET")
+		errorHandling.RespondOnlyXAccepted(w, "GET")
 		return
 	}
 
@@ -278,22 +279,9 @@ func list(w http.ResponseWriter, r *http.Request) {
 		json, err := json.Marshal(value)
 
 		if err != nil {
-			respondWithErrorStack(w, err)
+			errorHandling.RespondWithErrorStack(w, err)
 			return
 		}
 		fmt.Fprintln(w, key, ": ", json)
 	}
-}
-
-func respondWithErrorStack(w http.ResponseWriter, err error) {
-	respondWithError(w, err.Error())
-}
-
-func respondOnlyXAccepted(w http.ResponseWriter, x string) {
-	respondWithError(w, "only "+x+" accepted")
-}
-
-func respondWithError(w http.ResponseWriter, reason string) {
-	w.WriteHeader(http.StatusBadRequest)
-	fmt.Fprint(w, "Error : ", reason)
 }

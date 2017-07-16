@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/tsauvajon/go-microservices-poc/errorHandling"
 	"github.com/tsauvajon/go-microservices-poc/registering"
 )
 
@@ -30,34 +31,34 @@ func main() {
 
 func receiveImage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		respondOnlyXAccepted(w, "POST")
+		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
 	}
 
 	values, err := url.ParseQuery(r.URL.RawQuery)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
 	id := values.Get("id")
 
 	if len(id) == 0 {
-		respondWithError(w, "invalid id")
+		errorHandling.RespondWithError(w, "invalid id")
 		return
 	}
 
 	state := values.Get("state")
 
 	if state != StateWorking && state != StateFinished {
-		respondWithError(w, "invalid state")
+		errorHandling.RespondWithError(w, "invalid state")
 	}
 
 	_, err = strconv.Atoi(id)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
@@ -65,14 +66,14 @@ func receiveImage(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
 	_, err = io.Copy(file, r.Body)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
@@ -81,28 +82,28 @@ func receiveImage(w http.ResponseWriter, r *http.Request) {
 
 func serveImage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		respondOnlyXAccepted(w, "GET")
+		errorHandling.RespondOnlyXAccepted(w, "GET")
 		return
 	}
 
 	values, err := url.ParseQuery(r.URL.RawQuery)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
 	id := values.Get("id")
 
 	if len(id) == 0 {
-		respondWithError(w, "invalid ID")
+		errorHandling.RespondWithError(w, "invalid ID")
 		return
 	}
 
 	state := values.Get("state")
 
 	if state != StateWorking && state != StateFinished {
-		respondWithError(w, "invalid state")
+		errorHandling.RespondWithError(w, "invalid state")
 		return
 	}
 
@@ -110,7 +111,7 @@ func serveImage(w http.ResponseWriter, r *http.Request) {
 	_, err = strconv.Atoi(id)
 
 	if err != nil {
-		respondWithError(w, "invalid ID")
+		errorHandling.RespondWithError(w, "invalid ID")
 		return
 	}
 
@@ -118,27 +119,14 @@ func serveImage(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
 	_, err = io.Copy(w, file)
 
 	if err != nil {
-		respondWithErrorStack(w, err)
+		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
-}
-
-func respondWithErrorStack(w http.ResponseWriter, err error) {
-	respondWithError(w, err.Error())
-}
-
-func respondOnlyXAccepted(w http.ResponseWriter, x string) {
-	respondWithError(w, "only "+x+" accepted")
-}
-
-func respondWithError(w http.ResponseWriter, reason string) {
-	w.WriteHeader(http.StatusBadRequest)
-	fmt.Fprint(w, "Error : ", reason)
 }
