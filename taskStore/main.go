@@ -65,6 +65,7 @@ func registerInKeyValueStore() bool {
 		return false
 	}
 
+	// itself
 	databaseAddress := os.Args[1]
 	keyValueStoreAddress := os.Args[2]
 
