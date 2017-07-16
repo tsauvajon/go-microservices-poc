@@ -10,32 +10,12 @@ import (
 	"strconv"
 	"sync"
 	"time"
-)
 
-const (
-	// StatusNotStarted : this task isn't started yet
-	StatusNotStarted = 0
-	// StatusInProgress : this task is in progress
-	StatusInProgress = 1
-	// StatusFinished : this task is done
-	StatusFinished = 2
+	"github.com/tsauvajon/go-microservices-poc/task"
 )
-
-/*
-Task :
-Consecutive IDs
-state :
-	0 – not started
-	1 – in progress
-	2 – finished
-*/
-type Task struct {
-	ID    int `json:"id"`
-	State int `json:"state"`
-}
 
 var (
-	datastore                  map[int]Task
+	datastore                  map[int]task.Task
 	datastoreMutex             sync.RWMutex
 	oldestNotFinishedTask      int // can int overflow, use something bigger in production
 	oldestNotFinishedTaskMutex sync.RWMutex
@@ -43,7 +23,7 @@ var (
 
 func main() {
 
-	datastore = make(map[int]Task)
+	datastore = make(map[int]task.Task)
 	datastoreMutex = sync.RWMutex{}
 
 	oldestNotFinishedTask = 0
@@ -149,9 +129,9 @@ func newTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	datastoreMutex.RLock()
-	taskToAdd := Task{
+	taskToAdd := task.Task{
 		ID:    len(datastore),
-		State: StatusNotStarted,
+		State: task.StatusNotStarted,
 	}
 	datastore[taskToAdd.ID] = taskToAdd
 	datastoreMutex.RUnlock()
@@ -178,21 +158,21 @@ func getNewTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	taskToSend := Task{
+	taskToSend := task.Task{
 		ID:    -1,
-		State: StatusNotStarted,
+		State: task.StatusNotStarted,
 	}
 
 	oldestNotFinishedTaskMutex.Lock()
 	datastoreMutex.Lock()
 
 	for i := oldestNotFinishedTask; i < len(datastore); i++ {
-		if i == oldestNotFinishedTask && datastore[i].State == StatusFinished {
+		if i == oldestNotFinishedTask && datastore[i].State == task.StatusFinished {
 			oldestNotFinishedTask++
 			continue
 		}
 
-		if datastore[i].State == StatusNotStarted {
+		if datastore[i].State == task.StatusNotStarted {
 			taskToSend = datastore[i]
 			break
 		}
@@ -211,9 +191,9 @@ func getNewTask(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		time.Sleep(time.Minute * 2)
 		datastoreMutex.Lock()
-		datastore[id] = Task{
+		datastore[id] = task.Task{
 			ID:    id,
-			State: StatusNotStarted,
+			State: task.StatusNotStarted,
 		}
 		// set oldestNotFinishedTask to id ?
 		datastoreMutex.Unlock()
@@ -256,16 +236,16 @@ func finishTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedTask := Task{
+	updatedTask := task.Task{
 		ID:    id,
-		State: StatusFinished,
+		State: task.StatusFinished,
 	}
 
 	isInError := false
 
 	datastoreMutex.RLock()
 
-	if datastore[id].State != StatusInProgress {
+	if datastore[id].State != task.StatusInProgress {
 		isInError = true
 	} else {
 		datastore[id] = updatedTask
@@ -304,7 +284,7 @@ func setByID(w http.ResponseWriter, r *http.Request) {
 	isInError := false
 
 	datastoreMutex.RLock()
-	if taskToSet.ID >= len(datastore) || taskToSet.State < StatusNotStarted || taskToSet.State > StatusFinished {
+	if taskToSet.ID >= len(datastore) || taskToSet.State < task.StatusNotStarted || taskToSet.State > task.StatusFinished {
 		isInError = true
 	} else {
 		datastore[taskToSet.ID] = taskToSet
