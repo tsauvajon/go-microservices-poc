@@ -1,4 +1,4 @@
-package registering
+package dataAccess
 
 import (
 	"fmt"

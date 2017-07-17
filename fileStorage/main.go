@@ -8,8 +8,8 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/tsauvajon/go-microservices-poc/dataAccess"
 	"github.com/tsauvajon/go-microservices-poc/errorHandling"
-	"github.com/tsauvajon/go-microservices-poc/registering"
 )
 
 const (
@@ -20,7 +20,7 @@ const (
 )
 
 func main() {
-	if !registering.RegisterInKeyValueStore("storageAddress") {
+	if !dataAccess.RegisterInKeyValueStore("storageAddress") {
 		return
 	}
 

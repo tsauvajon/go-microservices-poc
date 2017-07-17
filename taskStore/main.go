@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/tsauvajon/go-microservices-poc/dataAccess"
 	"github.com/tsauvajon/go-microservices-poc/errorHandling"
-	"github.com/tsauvajon/go-microservices-poc/registering"
 	"github.com/tsauvajon/go-microservices-poc/task"
 )
 
@@ -23,7 +23,7 @@ var (
 )
 
 func main() {
-	if !registering.RegisterInKeyValueStore("keyValueStoreAddress") {
+	if !dataAccess.RegisterInKeyValueStore("keyValueStoreAddress") {
 		return
 	}
 
