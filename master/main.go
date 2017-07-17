@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"os"
 
-	"errors"
 	"fmt"
 
 	"io/ioutil"
@@ -15,8 +14,8 @@ import (
 
 	"io"
 
+	"github.com/tsauvajon/go-microservices-poc/dataAccess"
 	"github.com/tsauvajon/go-microservices-poc/errorHandling"
-	"github.com/tsauvajon/go-microservices-poc/registering"
 	"github.com/tsauvajon/go-microservices-poc/task"
 )
 
@@ -27,27 +26,25 @@ var (
 )
 
 func main() {
-	if !registering.RegisterInKeyValueStore("masterAddress") {
+	if !dataAccess.RegisterInKeyValueStore("masterAddress") {
 		return
 	}
 
 	keyValueStoreAddress := os.Args[2]
 
-	value, err := getValueFromKeyValueStore(keyValueStoreAddress, "databaseAddress")
+	databaseLocation, err := dataAccess.GetValue(keyValueStoreAddress, "databaseAddress")
 
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
-	databaseLocation = value
-
-	value, err = getValueFromKeyValueStore(keyValueStoreAddress, "storageAddress")
+	storageLocation, err = dataAccess.GetValue(keyValueStoreAddress, "storageAddress")
 
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
-
-	storageLocation = value
 
 	fmt.Println(databaseLocation, storageLocation)
 
@@ -172,28 +169,57 @@ func isReady(w http.ResponseWriter, r *http.Request) {
 }
 
 func getNewTask(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		errorHandling.RespondOnlyXAccepted(w, "GET")
+		return
+	}
+
+	response, err := http.Post("http://"+databaseLocation+"/getNewTask", "text/plain", nil)
+
+	if err != nil {
+		errorHandling.RespondWithErrorStack(w, err)
+		return
+	}
+
+	_, err = io.Copy(w, response.Body)
+
+	if err != nil {
+		errorHandling.RespondWithErrorStack(w, err)
+		return
+	}
 }
 
 func registerTaskFinished(w http.ResponseWriter, r *http.Request) {
-}
+	if r.Method != http.MethodPost {
+		errorHandling.RespondOnlyXAccepted(w, "POST")
+		return
+	}
 
-func getValueFromKeyValueStore(address, key string) (string, error) {
-	response, err := http.Get("http://" + address + "/get?key=" + key)
+	values, err := url.ParseQuery(r.URL.RawQuery)
 
 	if err != nil {
-		return "", err
+		errorHandling.RespondWithErrorStack(w, err)
+		return
 	}
 
-	if response.StatusCode != http.StatusOK {
-		fmt.Println(response.Body)
-		return "", errors.New("Error: can't get the database address")
+	id := values.Get("id")
+
+	if len(id) == 0 {
+		errorHandling.RespondWithError(w, "invalid ID")
+		return
 	}
 
-	data, err := ioutil.ReadAll(response.Body)
+	response, err := http.Post("http://"+databaseLocation+"/finishTask?id="+id, "text/plain", nil)
 
 	if err != nil {
-		return "", err
+		errorHandling.RespondWithErrorStack(w, err)
+		return
 	}
 
-	return string(data), nil
+	_, err = io.Copy(w, response.Body)
+
+	if err != nil {
+		errorHandling.RespondWithErrorStack(w, err)
+		return
+	}
 }
