@@ -161,11 +161,11 @@ func isReady(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(data, &requestedTask)
 
 	if requestedTask.State == task.StatusFinished {
-		fmt.Fprint(w, "1")
+		fmt.Fprint(w, task.StatusFinished)
 		return
 	}
 
-	fmt.Fprint(w, "0")
+	fmt.Fprint(w, task.StatusInProgress)
 }
 
 func getNewTask(w http.ResponseWriter, r *http.Request) {
