@@ -39,14 +39,18 @@ func main() {
 
 	keyValueStoreAddress = os.Args[1]
 
-	masterLocation, err := dataAccess.GetValue(keyValueStoreAddress, "masterAddress")
+	value, err := dataAccess.GetValue(keyValueStoreAddress, "masterAddress")
+
+	masterLocation = value
 
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	storageLocation, err := dataAccess.GetValue(keyValueStoreAddress, "storageAddress")
+	value, err = dataAccess.GetValue(keyValueStoreAddress, "storageAddress")
+
+	storageLocation = value
 
 	if err != nil {
 		fmt.Println(err)
@@ -120,6 +124,7 @@ func getNewTask(masterAddress string) (task.Task, error) {
 		}, err
 	}
 
+	defer response.Body.Close()
 	data, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {

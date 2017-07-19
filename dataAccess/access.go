@@ -20,6 +20,7 @@ func GetValue(address, key string) (string, error) {
 		return "", errors.New("Error: can't get the database address")
 	}
 
+	defer response.Body.Close()
 	data, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {

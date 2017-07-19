@@ -30,7 +30,9 @@ func main() {
 
 	keyValueStoreAddress = os.Args[1]
 
-	masterLocation, err := dataAccess.GetValue(keyValueStoreAddress, "masterAddress")
+	value, err := dataAccess.GetValue(keyValueStoreAddress, "masterAddress")
+
+	masterLocation = value
 
 	if err != nil {
 		fmt.Println(err)
@@ -64,23 +66,35 @@ func handleTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, _, err := r.FormFile("uploadFile")
+	// to check what is the file key
+	// for k, l := range r.MultipartForm.File {
+	// 	fmt.Println(k)
+	// }
+
+	file, _, err := r.FormFile("uploadfile")
 
 	if err != nil {
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
+
+	fmt.Println("Posting the file through " + masterLocation)
 
 	response, err := http.Post("http://"+masterLocation+"/new", "image", file)
 
 	if err != nil || response.StatusCode != http.StatusOK {
+		fmt.Println("Error Posting the file")
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
+	fmt.Println("Reading the response")
+
+	defer response.Body.Close()
 	data, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
+		fmt.Println("Error reading the response")
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
@@ -115,6 +129,7 @@ func handleCheckForReadiness(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer response.Body.Close()
 	data, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {

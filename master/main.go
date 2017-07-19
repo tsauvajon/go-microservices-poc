@@ -32,14 +32,18 @@ func main() {
 
 	keyValueStoreAddress := os.Args[2]
 
-	databaseLocation, err := dataAccess.GetValue(keyValueStoreAddress, "databaseAddress")
+	value, err := dataAccess.GetValue(keyValueStoreAddress, "databaseAddress")
+
+	databaseLocation = value
 
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	storageLocation, err = dataAccess.GetValue(keyValueStoreAddress, "storageAddress")
+	value, err = dataAccess.GetValue(keyValueStoreAddress, "storageAddress")
+
+	storageLocation = value
 
 	if err != nil {
 		fmt.Println(err)
@@ -70,6 +74,7 @@ func newImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer response.Body.Close()
 	id, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
@@ -149,6 +154,7 @@ func isReady(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer response.Body.Close()
 	data, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {

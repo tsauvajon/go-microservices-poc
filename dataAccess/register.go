@@ -29,6 +29,7 @@ func RegisterInKeyValueStore(key string) bool {
 		return false
 	}
 
+	defer response.Body.Close()
 	data, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
