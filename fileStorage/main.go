@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -30,6 +31,8 @@ func main() {
 }
 
 func receiveImage(w http.ResponseWriter, r *http.Request) {
+	log.Println("receiveImage")
+
 	if r.Method != http.MethodPost {
 		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
@@ -82,6 +85,8 @@ func receiveImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveImage(w http.ResponseWriter, r *http.Request) {
+	log.Println("serveImage")
+
 	if r.Method != http.MethodGet {
 		errorHandling.RespondOnlyXAccepted(w, "GET")
 		return

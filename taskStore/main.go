@@ -23,7 +23,7 @@ var (
 )
 
 func main() {
-	if !dataAccess.RegisterInKeyValueStore("keyValueStoreAddress") {
+	if !dataAccess.RegisterInKeyValueStore("databaseAddress") {
 		return
 	}
 

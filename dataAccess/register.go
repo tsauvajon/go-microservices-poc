@@ -38,9 +38,11 @@ func RegisterInKeyValueStore(key string) bool {
 	}
 
 	if response.StatusCode != http.StatusOK {
-		fmt.Println("Error: ", "failure contacting the key-value store", string(data))
+		fmt.Println("Error:", "failure contacting the key-value store", string(data))
 		return false
 	}
+
+	fmt.Println("Registered", key, ":", selfAddress)
 
 	return true
 }

@@ -78,9 +78,9 @@ func handleTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Posting the file through " + masterLocation)
+	fmt.Println("Posting the file to", "http://"+masterLocation+"/newImage")
 
-	response, err := http.Post("http://"+masterLocation+"/new", "image", file)
+	response, err := http.Post("http://"+masterLocation+"/newImage", "image", file)
 
 	if err != nil || response.StatusCode != http.StatusOK {
 		fmt.Println("Error Posting the file")

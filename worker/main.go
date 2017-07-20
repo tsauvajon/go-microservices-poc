@@ -118,6 +118,7 @@ func getNewTask(masterAddress string) (task.Task, error) {
 	response, err := http.Post("http://"+masterAddress+"/getNewTask", "text/plain", nil)
 
 	if err != nil || response.StatusCode != http.StatusOK {
+		fmt.Println("Error: ", "getNewTask => http.Post", err.Error(), response.Status)
 		return task.Task{
 			ID:    -1,
 			State: -1,
@@ -128,6 +129,7 @@ func getNewTask(masterAddress string) (task.Task, error) {
 	data, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
+		fmt.Println("Error: ", "getNewTask => ioutil.ReadAll", err.Error())
 		return task.Task{
 			ID:    -1,
 			State: -1,
@@ -139,6 +141,7 @@ func getNewTask(masterAddress string) (task.Task, error) {
 	err = json.Unmarshal(data, &t)
 
 	if err != nil {
+		fmt.Println("Error: ", "getNewTask => json.Unmarshal", err.Error())
 		return task.Task{
 			ID:    -1,
 			State: -1,
@@ -152,6 +155,7 @@ func getImageFromStorage(storageAddress string, t task.Task) (image.Image, error
 	response, err := http.Get("http://" + storageAddress + "/getImage?state=working&id=" + strconv.Itoa(t.ID))
 
 	if err != nil || response.StatusCode != http.StatusOK {
+		fmt.Println("Error: ", "getImageFromStorage => http.Get", err.Error(), response.Status)
 		return nil, err
 	}
 
@@ -192,6 +196,7 @@ func sendImageToStorage(storageAddress string, t task.Task, img image.Image) err
 	err := png.Encode(buffer, img)
 
 	if err != nil {
+		fmt.Println("Error: ", "sendImageToStorage => png.Encode", err.Error())
 		return err
 	}
 
@@ -200,6 +205,7 @@ func sendImageToStorage(storageAddress string, t task.Task, img image.Image) err
 	response, err := http.Post("http://"+storageAddress+"/sendImage?state=finished&id="+id, "image/png", buffer)
 
 	if err != nil {
+		fmt.Println("Error: ", "sendImageToStorage => http.Post", err.Error())
 		return err
 	}
 
@@ -215,6 +221,7 @@ func registerFinishedTask(masterAddress string, t task.Task) error {
 	response, err := http.Post("http://"+masterAddress+"/registerFinishedTask?id="+id, "text/plain", nil)
 
 	if err != nil {
+		fmt.Println("Error: ", "registerFinishedTask => http.Post", err.Error())
 		return err
 	}
 

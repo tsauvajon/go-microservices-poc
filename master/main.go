@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"os"
 
@@ -50,18 +51,18 @@ func main() {
 		return
 	}
 
-	fmt.Println(databaseLocation, storageLocation)
-
-	http.HandleFunc("newImage", newImage)
-	http.HandleFunc("getImage", getImage)
-	http.HandleFunc("isReady", isReady)
-	http.HandleFunc("getNewTask", getNewTask)
-	http.HandleFunc("registerTaskFinished", registerTaskFinished)
+	http.HandleFunc("/newImage", newImage)
+	http.HandleFunc("/getImage", getImage)
+	http.HandleFunc("/isReady", isReady)
+	http.HandleFunc("/getNewTask", getNewTask)
+	http.HandleFunc("/registerTaskFinished", registerTaskFinished)
 
 	http.ListenAndServe(":3333", nil)
 }
 
 func newImage(w http.ResponseWriter, r *http.Request) {
+	log.Println("newImage")
+
 	if r.Method != http.MethodPost {
 		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
@@ -82,6 +83,8 @@ func newImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("Image id :", id)
+
 	_, err = http.Post("http://"+storageLocation+"/sendImage?id="+string(id)+"&state=working", "image", r.Body)
 
 	if err != nil {
@@ -93,6 +96,8 @@ func newImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func getImage(w http.ResponseWriter, r *http.Request) {
+	log.Println("getImage")
+
 	if r.Method != http.MethodGet {
 		errorHandling.RespondOnlyXAccepted(w, "GET")
 		return
@@ -175,6 +180,8 @@ func isReady(w http.ResponseWriter, r *http.Request) {
 }
 
 func getNewTask(w http.ResponseWriter, r *http.Request) {
+	log.Println("getNewTask")
+
 	if r.Method != http.MethodGet {
 		errorHandling.RespondOnlyXAccepted(w, "GET")
 		return

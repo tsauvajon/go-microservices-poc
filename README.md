@@ -14,14 +14,14 @@ cd ./client, ./keyValueStore, ./fileStorage, ./master, ./taskStore and `go build
 # start keyValueStore (will be hosted on :3330)
 ./keyValueStore
 
-# connect the master (hosted on :3333)
-./master :3333 :3330
-
 # connect the fileStorage
 ./fileStorage :3332 :3330
 
 # connect the taskStore
 ./taskStore :3331 :3330
+
+# connect the master (hosted on :3333)
+./master :3333 :3330
 
 # connect the client (will be hosted on :3334)
 ./client :3330

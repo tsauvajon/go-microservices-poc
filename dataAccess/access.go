@@ -9,6 +9,8 @@ import (
 
 // GetValue : get the value associated with a key
 func GetValue(address, key string) (string, error) {
+	fmt.Println("Getting ", key, " from ", address)
+
 	response, err := http.Get("http://" + address + "/get?key=" + key)
 
 	if err != nil {
@@ -26,6 +28,8 @@ func GetValue(address, key string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	fmt.Println("Returning value: ", string(data))
 
 	return string(data), nil
 }
