@@ -180,8 +180,6 @@ func isReady(w http.ResponseWriter, r *http.Request) {
 }
 
 func getNewTask(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("getNewTask")
-
 	if r.Method != http.MethodPost {
 		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
@@ -202,11 +200,11 @@ func getNewTask(w http.ResponseWriter, r *http.Request) {
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
-
-	fmt.Println("getNewTask => no error")
 }
 
 func registerTaskFinished(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("registerTaskFinished")
+
 	if r.Method != http.MethodPost {
 		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
@@ -225,6 +223,8 @@ func registerTaskFinished(w http.ResponseWriter, r *http.Request) {
 		errorHandling.RespondWithError(w, "invalid ID")
 		return
 	}
+
+	fmt.Println("Registering in database:", "http://"+databaseLocation+"/finishTask?id="+id)
 
 	response, err := http.Post("http://"+databaseLocation+"/finishTask?id="+id, "text/plain", nil)
 

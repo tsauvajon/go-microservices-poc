@@ -139,7 +139,10 @@ func getNewTask(w http.ResponseWriter, r *http.Request) {
 	oldestNotFinishedTaskMutex.Lock()
 	datastoreMutex.Lock()
 
+	fmt.Println("oldestNotFinishedTask:", oldestNotFinishedTask)
+
 	for i := oldestNotFinishedTask; i < len(datastore); i++ {
+		fmt.Println("checking tasks. ID:", datastore[i].ID, "State:", datastore[i].State)
 		if i == oldestNotFinishedTask && datastore[i].State == task.StatusFinished {
 			oldestNotFinishedTask++
 			continue
@@ -189,6 +192,8 @@ func getNewTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func finishTask(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("finishTask")
+
 	if r.Method != http.MethodPost {
 		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
@@ -222,6 +227,8 @@ func finishTask(w http.ResponseWriter, r *http.Request) {
 		State: task.StatusFinished,
 	}
 
+	fmt.Println("updating task => ID:", updatedTask.ID, "State:", updatedTask.State)
+
 	isInError := false
 
 	datastoreMutex.RLock()
@@ -230,6 +237,7 @@ func finishTask(w http.ResponseWriter, r *http.Request) {
 		isInError = true
 	} else {
 		datastore[id] = updatedTask
+		fmt.Println("datastore length:", len(datastore))
 	}
 	datastoreMutex.RUnlock()
 
