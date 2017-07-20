@@ -23,6 +23,9 @@ cd ./client, ./keyValueStore, ./fileStorage, ./master, ./taskStore and `go build
 # connect the master (hosted on :3333)
 ./master :3333 :3330
 
+# connect workers
+./worker :3330 2
+
 # connect the client (will be hosted on :3334)
 ./client :3330
 ```

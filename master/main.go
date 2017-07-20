@@ -61,7 +61,7 @@ func main() {
 }
 
 func newImage(w http.ResponseWriter, r *http.Request) {
-	log.Println("newImage")
+	fmt.Println("newImage")
 
 	if r.Method != http.MethodPost {
 		errorHandling.RespondOnlyXAccepted(w, "POST")
@@ -180,16 +180,17 @@ func isReady(w http.ResponseWriter, r *http.Request) {
 }
 
 func getNewTask(w http.ResponseWriter, r *http.Request) {
-	log.Println("getNewTask")
+	fmt.Println("getNewTask")
 
-	if r.Method != http.MethodGet {
-		errorHandling.RespondOnlyXAccepted(w, "GET")
+	if r.Method != http.MethodPost {
+		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
 	}
 
 	response, err := http.Post("http://"+databaseLocation+"/getNewTask", "text/plain", nil)
 
 	if err != nil {
+		fmt.Println("master :193", err.Error())
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
@@ -197,9 +198,12 @@ func getNewTask(w http.ResponseWriter, r *http.Request) {
 	_, err = io.Copy(w, response.Body)
 
 	if err != nil {
+		fmt.Println("master :201", err.Error())
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
+
+	fmt.Println("getNewTask => no error")
 }
 
 func registerTaskFinished(w http.ResponseWriter, r *http.Request) {

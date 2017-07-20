@@ -111,8 +111,10 @@ func newTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func getNewTask(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		errorHandling.RespondOnlyXAccepted(w, "GET")
+	fmt.Println("getNewTask")
+
+	if r.Method != http.MethodPost {
+		errorHandling.RespondOnlyXAccepted(w, "POST")
 		return
 	}
 
@@ -170,14 +172,20 @@ func getNewTask(w http.ResponseWriter, r *http.Request) {
 		datastoreMutex.Unlock()
 	}()
 
+	// taskToSend.ID: 0 taskToSend.State 0
+	fmt.Println("taskToSend.ID:", taskToSend.ID, "taskToSend.State", taskToSend.State)
+
 	response, err := json.Marshal(taskToSend)
 
 	if err != nil {
+		fmt.Println("taskStore :180 : ", err.Error())
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
 
-	fmt.Fprint(w, response)
+	fmt.Println("getNewTask => ", string(response))
+
+	fmt.Fprint(w, string(response))
 }
 
 func finishTask(w http.ResponseWriter, r *http.Request) {
@@ -189,6 +197,7 @@ func finishTask(w http.ResponseWriter, r *http.Request) {
 	values, err := url.ParseQuery(r.URL.RawQuery)
 
 	if err != nil {
+		fmt.Println("taskStore :196 : ", err.Error())
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
@@ -203,6 +212,7 @@ func finishTask(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(strid)
 
 	if err != nil {
+		fmt.Println("taskStore :211 : ", err.Error())
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}

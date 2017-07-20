@@ -99,7 +99,7 @@ func main() {
 					continue
 				}
 
-				err = registerFinishedTask(masterLocation, task)
+				err = registerTaskFinished(masterLocation, task)
 
 				if err != nil {
 					fmt.Println("Error: ", err)
@@ -115,10 +115,20 @@ func main() {
 }
 
 func getNewTask(masterAddress string) (task.Task, error) {
+	fmt.Println("Getting new task from", "http://"+masterAddress+"/getNewTask")
+
 	response, err := http.Post("http://"+masterAddress+"/getNewTask", "text/plain", nil)
 
-	if err != nil || response.StatusCode != http.StatusOK {
-		fmt.Println("Error: ", "getNewTask => http.Post", err.Error(), response.Status)
+	if err != nil {
+		fmt.Println("Error: ", "getNewTask => http.Post", err.Error())
+		return task.Task{
+			ID:    -1,
+			State: -1,
+		}, err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		fmt.Println("Error: ", "getNewTask => http.Post", response.Status)
 		return task.Task{
 			ID:    -1,
 			State: -1,
@@ -138,6 +148,8 @@ func getNewTask(masterAddress string) (task.Task, error) {
 
 	t := task.Task{}
 
+	fmt.Println("Unmarshalling", string(data))
+
 	err = json.Unmarshal(data, &t)
 
 	if err != nil {
@@ -148,14 +160,21 @@ func getNewTask(masterAddress string) (task.Task, error) {
 		}, err
 	}
 
+	fmt.Println("Got a new task:", t.ID)
+
 	return t, nil
 }
 
 func getImageFromStorage(storageAddress string, t task.Task) (image.Image, error) {
 	response, err := http.Get("http://" + storageAddress + "/getImage?state=working&id=" + strconv.Itoa(t.ID))
 
-	if err != nil || response.StatusCode != http.StatusOK {
-		fmt.Println("Error: ", "getImageFromStorage => http.Get", err.Error(), response.Status)
+	if err != nil {
+		fmt.Println("Error: ", "getImageFromStorage => http.Get", err.Error())
+		return nil, err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		fmt.Println("Error: ", "getImageFromStorage => http.Get", response.Status)
 		return nil, err
 	}
 
@@ -216,12 +235,14 @@ func sendImageToStorage(storageAddress string, t task.Task, img image.Image) err
 	return nil
 }
 
-func registerFinishedTask(masterAddress string, t task.Task) error {
+func registerTaskFinished(masterAddress string, t task.Task) error {
 	id := strconv.Itoa(t.ID)
-	response, err := http.Post("http://"+masterAddress+"/registerFinishedTask?id="+id, "text/plain", nil)
+
+	fmt.Println("registerTaskFinished on", "http://"+masterAddress+"/registerTaskFinished?id="+id)
+	response, err := http.Post("http://"+masterAddress+"/registerTaskFinished?id="+id, "text/plain", nil)
 
 	if err != nil {
-		fmt.Println("Error: ", "registerFinishedTask => http.Post", err.Error())
+		fmt.Println("Error: ", "registerTaskFinished => http.Post", err.Error())
 		return err
 	}
 

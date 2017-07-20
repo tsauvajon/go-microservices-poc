@@ -66,7 +66,8 @@ func receiveImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, err := os.Create("/tmp/" + state + "/" + id + ".png")
+	// Change to /tmp/ on Unix systems
+	file, err := os.Create("c:/tmp/" + state + "/" + id + ".png")
 	defer file.Close()
 
 	if err != nil {
@@ -81,6 +82,7 @@ func receiveImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("receiveImage : success")
 	fmt.Fprint(w, "Success")
 }
 
@@ -95,6 +97,7 @@ func serveImage(w http.ResponseWriter, r *http.Request) {
 	values, err := url.ParseQuery(r.URL.RawQuery)
 
 	if err != nil {
+		fmt.Println("Error parsing url", err.Error())
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
@@ -102,6 +105,7 @@ func serveImage(w http.ResponseWriter, r *http.Request) {
 	id := values.Get("id")
 
 	if len(id) == 0 {
+		fmt.Println("Invalid ID")
 		errorHandling.RespondWithError(w, "invalid ID")
 		return
 	}
@@ -109,6 +113,7 @@ func serveImage(w http.ResponseWriter, r *http.Request) {
 	state := values.Get("state")
 
 	if state != StateWorking && state != StateFinished {
+		fmt.Println("Invalid State")
 		errorHandling.RespondWithError(w, "invalid state")
 		return
 	}
@@ -117,14 +122,17 @@ func serveImage(w http.ResponseWriter, r *http.Request) {
 	_, err = strconv.Atoi(id)
 
 	if err != nil {
+		fmt.Println("Invalid ID")
 		errorHandling.RespondWithError(w, "invalid ID")
 		return
 	}
 
-	file, err := os.Open("tmp/" + state + "/" + id + ".png")
+	// change to /tmp/ ... for Unix systems
+	file, err := os.Open("c:/tmp/" + state + "/" + id + ".png")
 	defer file.Close()
 
 	if err != nil {
+		fmt.Println("Error opening file:", err.Error())
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
@@ -132,6 +140,7 @@ func serveImage(w http.ResponseWriter, r *http.Request) {
 	_, err = io.Copy(w, file)
 
 	if err != nil {
+		fmt.Println("Error copying file:", err.Error())
 		errorHandling.RespondWithErrorStack(w, err)
 		return
 	}
